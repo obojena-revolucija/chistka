@@ -16,7 +16,9 @@
 <!-- 1. FIXED TOP STRIPE HEADER WITH BOOTSTRAP NAVBAR & DROPDOWN -->
     {% include 'header.html' %}
     
-    {% block content %}{% endblock %}
+    <main class="main-content mb-5">
+        {% block content %}{% endblock %}
+    </main>
 
     <!-- Bottom Stripe Footer -->
     <footer class="bottom-stripe">
