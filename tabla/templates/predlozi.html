@@ -1,0 +1,96 @@
+{% extends 'index_template.html' %}
+
+{% block title %}Predloži link - Ras-chish-chavanie{% endblock %}
+
+{% block content %}
+    <main class="page-content d-flex justify-content-center align-items-start" style="min-height: 100vh; padding: 110px 15px 60px 15px;">
+        <div class="content-card w-100" style="max-width: 650px;">
+            <h2>Predloži i ti video!</h2>
+            <p>
+                Nisi našla/našao neku akciju na listi? Pošalji nam link Instagram post-a da ga dodamo na listu.  
+            </p>
+
+            <!-- Link Submission Form -->
+            <form id="link-upload-form" class="mt-4">
+                <div class="mb-3">
+                    <label for="submitter-name" class="form-label text-white-50 small">Tvoje ime / nalog (nije neophodno):</label>
+                    <input type="text" id="submitter-name" name="submitter_name" class="form-control bg-dark text-white border-secondary" placeholder="npr. @pera_peric">
+                </div>
+
+                <div class="mb-3">
+                    <label for="post-link" class="form-label text-white-50 small">Link Instagram posta ili profila <span class="text-danger">*</span></label>
+                    <input type="url" id="post-link" name="post_link" class="form-control bg-dark text-white border-secondary" placeholder="https://www.instagram.com/p/..." required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="post-description" class="form-label text-white-50 small">Kratak opis akcije ili lokacija (nije neophodno):</label>
+                    <textarea id="post-description" name="post_description" rows="3" class="form-control bg-dark text-white border-secondary" placeholder="npr. Čišćenje parka u Novom Sadu..."></textarea>
+                </div>
+
+                <button type="submit" id="submit-btn" class="btn btn-outline-light w-100 py-2">
+                    Pošalji link ↗
+                </button>
+            </form>
+            <div id="form-msg" class="mt-2"></div>
+        
+
+            <a href="/" class="reload-btn" style="display: inline-block; text-decoration: none; margin-top: 20px;">← Nazad na tablu</a>
+        </div>
+    </main>
+{% endblock %}
+
+{% block bottom_script %}
+<!-- Include EmailJS SDK -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+    const messagesList = {{ messages | tojson }};
+</script>
+
+<script type="text/javascript">
+    
+    my_websheet_app = "https://script.google.com/macros/s/AKfycbyyH4JAIIbYzO21yN4Fy0EFJQPe2vD8eMZ8kPfQoyQPMPtX5XbC46_ph1Byw8_IiGFNgQ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyH4JAIIbYzO21yN4Fy0EFJQPe2vD8eMZ8kPfQoyQPMPtX5XbC46_ph1Byw8_IiGFNgQ/exec";
+
+    document.getElementById('link-upload-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submit-btn');
+        const msg = document.getElementById('form-msg');
+        
+        btn.disabled = true;
+        btn.textContent = "Slanje...";
+        msg.textContent = "";
+
+        const payload = {
+            submitter: document.getElementById('submitter-name').value,
+            link: document.getElementById('post-link').value,
+            description: document.getElementById('post-description').value
+        };
+
+        try {
+            // Using text/plain to avoid CORS preflight restrictions with Google Apps Script
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                msg.className = "text-success small mt-2";
+                msg.textContent = "Uspešno poslato! Hvala ti.";
+                document.getElementById('link-upload-form').reset();
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            msg.className = "text-danger small mt-2";
+            msg.textContent = "Došlo je do greške. Pokušaj ponovo.";
+            console.error(error);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Pošalji link";
+        }
+    });
+</script>
+{% endblock %}

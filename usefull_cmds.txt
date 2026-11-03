@@ -1,0 +1,8 @@
+#reduce video size
+ffmpeg -i {infile} -vcodec libx265 -crf 40 -an {outfile}
+
+# run flask for debug
+python -m flask --app tabla run --port 8000 --debug
+
+# freeze into static build
+python ./freeze.py

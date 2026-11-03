@@ -1,0 +1,149 @@
+{% extends 'index_template.html' %}
+
+{% block title %}Ras-chish-chavanie{% endblock %}
+
+
+{% block content %}
+ <!-- Description -->
+    <main class="page-content d-flex justify-content-center align-items-start" style="min-height: 100vh; padding: 50px 15px 60px 50px;">
+        <div class="content-card w-100" style="max-width: 950px;">
+            <h2>Radna akcija, narodna reakcija</h2>
+            <p><i>25og Novembra 2026. godine, studenti u Srbiji su zajedno sa narodom pobedili tamu!
+                Već iste večeri, građani su uzeli stvar (brusilicu) u svoje ruke i oslobili Pionirski park.
+                Sledećeg dana, probudili smo se u slobodnoj zemlji i bilo je jasno da su nam ruke pune posla.
+                Širom zemlje, u svojim komšilucima, ljudi su se organizovali i započeli akcije čišćenja.
+                </i>
+            </p>
+            <p>
+                Ideja ove stranice je da skupi na jedno mesto sve video zapise sa Instagrama koji su zabeležili akcije čišćenja širom zemlje. 
+                Da se ne izgube u feed-u koji nam algirtam servira. 
+                Da ne zaboravimo šta je sve moguće kada se organizujemo, skupimo i zasučemo rukave. 
+                Vreme je da vežbamo i osnažimo osvojenu slobodu i odupremo se do sada učenoj inerciji.
+                Ali, dosta filozofije!
+            </p>
+            <p>
+            <b>Veliko hvala svima koji su organizovali akcije i u njima učestvovali!
+            Zahvalite se praćenjem stranica, lajkovanjem post-ova i donacijama na preporučene adrese.
+            </b>
+            </p>
+            <p>
+                U nastavku je lista svih post-ova uključenih u ovu stranicu. 
+                Postovi su ručno skupljeni. Nije korišćena veštačka inteligencija, te su sigurno mnoge akcije propuštene. 
+                Pozivamo i vas da nam pošaljete i predložite postove čišćenja slobodne Srbije kako bi bili uključeni.
+            </p>
+
+           <!-- Sorting Controls on Top -->
+           <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+               <div class="d-flex align-items-center gap-2">
+                   <label for="sort-select" class="text-white-50 small mb-0">Sortiraj po:</label>
+                   <select id="sort-select" class="form-select form-select-sm bg-dark text-white border-secondary" style="width: auto;">
+                       <option value="date-asc">Datumu (najstarije)</option>
+                       <option value="date-desc">Datumu (najnovije)</option>
+                   </select>
+               </div>
+               <div id="posts-count-info" class="text-white-50 small"></div>
+           </div>
+
+           <!-- Scrollable Bootstrap Table Container with Fixed Length (approx 5 rows height) -->
+            <div class="table-responsive shadow-sm mb-0 border border-secondary rounded" style="max-height: 600px; overflow-y: auto;">
+                <table class="table table-dark table-striped table-hover table-bordered border-secondary align-middle mb-0">
+                    <thead class="table-dark border-secondary sticky-top" style="z-index: 1;">
+                        <tr>
+                            <th scope="col" class="text-nowrap" style="width: 12%;">Datum</th>
+                            <th scope="col" style="width: 65%;">Opis</th>
+                            <th scope="col" class="text-center" style="width: 8%;">Link</th>
+                        </tr>
+                    </thead>
+                    <tbody id="posts-table-body">
+                        <!-- Populated dynamically via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <a href="/" class="reload-btn" style="display: inline-block; text-decoration: none; margin-top: 15px;">← Nazad na tablu</a>
+        </div>
+    </main>
+{% endblock %}
+
+{% block bottom_script %}
+<script>
+    const messagesList = {{ messages | tojson }};
+    const allPosts = {{ posts | tojson }};
+</script>
+
+<!-- Populate Table and Sorting Logic via JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tableBody = document.getElementById('posts-table-body');
+        const sortSelect = document.getElementById('sort-select');
+        const countInfo = document.getElementById('posts-count-info');
+        if (!tableBody) return;
+
+        function renderTable(postsToRender) {
+            tableBody.innerHTML = "";
+
+            if (!postsToRender || postsToRender.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Nema pronađenih postova.</td></tr>`;
+                if (countInfo) countInfo.textContent = "0 postova";
+                return;
+            }
+
+            if (countInfo) {
+                countInfo.textContent = `Prikazano ${postsToRender.length} postova`;
+            }
+
+            postsToRender.forEach(post => {
+                const row = document.createElement('tr');
+                
+                // Fallback or generator for profile link if profile_url exists, otherwise uses account name format
+                const profileUrl = post.profile_url || `https://instagram.com/${post.account.replace('@', '')}`;
+
+                row.innerHTML = `
+                    <td class="text-nowrap small text-white-50">${post.date}</td>
+                    <td class="text-white" style="text-align: justify !important; font-size: 13px;">${post.description}</td>
+                    <td class="text-center">
+                        <div class="d-flex flex-column align-items-center gap-1">
+                            <a href="${post.post_url}" target="_blank" class="btn btn-sm btn-outline-light py-0 px-2 text-nowrap" style="font-size: 11px;">Pogledaj ↗</a>
+                            <a href="${profileUrl}" target="_blank" class="text-info text-decoration-none small" style="font-size: 11px;">${post.account} ↗</a>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function sortPosts(posts, criteria) {
+            let sorted = [...posts];
+            switch(criteria) {
+                case 'date-asc':
+                    sorted.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    break;
+                case 'date-desc':
+                    sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    break;
+                case 'account-asc':
+                    sorted.sort((a, b) => (a.account || "").localeCompare(b.account || ""));
+                    break;
+                case 'account-desc':
+                    sorted.sort((a, b) => (b.account || "").localeCompare(a.account || ""));
+                    break;
+                default:
+                    break;
+            }
+            return sorted;
+        }
+
+        // Initial render with default sort
+        let currentSorted = sortPosts(allPosts, sortSelect ? sortSelect.value : 'date-asc');
+        renderTable(currentSorted);
+
+        // Event listener for sort change
+        if (sortSelect) {
+            sortSelect.addEventListener('change', (e) => {
+                currentSorted = sortPosts(allPosts, e.target.value);
+                renderTable(currentSorted);
+            });
+        }
+    });
+</script>
+{% endblock %}

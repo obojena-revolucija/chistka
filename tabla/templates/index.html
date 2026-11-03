@@ -1,0 +1,23 @@
+{% extends 'index_template.html' %}
+
+{% block title %}Ras-chish-chavanie{% endblock %}
+
+
+{% block content %}
+ <!-- 4x4 Grid container -->
+    <div id="grid-container" class="grid-container"></div>
+{% endblock %}
+
+
+
+{% block bottom %}
+        <button class="reload-btn" onclick="refreshAllVideos()">♻️❤️‍🔥 Još! ❤️‍🔥♻️</button>
+{% endblock %}
+
+{% block bottom_script %}
+<script>
+    const allVideos = {{ videos | tojson }};
+    const songsList = {{ songs | tojson }};
+    const messagesList = {{ messages | tojson }};
+</script>
+{% endblock %}
