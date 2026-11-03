@@ -55,7 +55,16 @@ def index():
         video_item["video_path"] = video_path
         video_items.append(video_item)
     
-    songs = ["/static/music/vquo.mp3"]
+    songs = ["static/music/benny_hill.mp3",
+            "static/music/ekv.mp3",
+            "static/music/fire.mp3",
+            "static/music/freedom.mp3",
+            "static/music/globtrotters.mp3",
+            "static/music/kolo.mp3",
+            "static/music/lovely_day.mp3",
+            "static/music/vquo copy.mp3",
+            "static/music/vquo.mp3",
+            "static/music/wonderfulworld.mp3"]
 
     return render_template('index.html', 
                             videos=video_items, 
