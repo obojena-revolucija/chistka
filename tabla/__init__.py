@@ -44,7 +44,7 @@ def index():
         shortcode = row["shortcode"]
         account = row["account"]
         post_url = row["link"]
-        video_path = glob.glob(f"{ROOT}/static/videos/{shortcode}/*_UTC.mp4")
+        video_path = glob.glob(f"{ROOT}/static/videos/{shortcode}/small.mp4")
         if len(video_path) == 0:
             continue
         print(video_path)
